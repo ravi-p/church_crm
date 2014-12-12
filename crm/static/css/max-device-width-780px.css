@@ -1,0 +1,36 @@
+@media only screen and (max-device-width: 480px){
+    #msg_container{
+        /*display: none;*/
+    }
+ 
+   /* input[name="search"] {
+       width: 200px;
+    } 
+    panel-heading > span::after{
+    font-family: "Glyphicons Halflings";
+    content: "\e003";
+    padding-left:10px;
+    border:1px solid #021a40;
+    }*/   
+   /* $("#my_act").append("<span> - 2nd!</span>"); */
+
+    
+    .navbar-default .navbar-toggle{ margin-right: 100px;}
+    .panel .panel-default{width:400px;}
+    .searchform{display:none;}
+    
+    #srchform > div > button{display:none;}
+    #page.container-fluid {
+        padding-left:2px;
+        padding-right:2px;
+        }
+    #body_outer.container {
+        padding-left:3px;
+        padding-right:3px;
+        }
+    #panelbody {padding:3px;}
+    #msg_container{height:40px;}
+    tbody > tr {height:10px;}
+
+}
+

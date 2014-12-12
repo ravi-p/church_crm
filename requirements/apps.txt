@@ -1,0 +1,4 @@
+http://www.djangoproject.com/download/1.6.2/tarball/
+#django
+south
+pytz

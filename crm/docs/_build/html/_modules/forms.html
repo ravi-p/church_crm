@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>forms &mdash; crm 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="crm 1.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">crm 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for forms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.forms</span> <span class="kn">import</span> <span class="n">UserCreationForm</span><span class="p">,</span> <span class="n">UserChangeForm</span>
+<span class="c">#from django.forms.models import inlineformset_factory</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">ModelForm</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">django.core.validators</span> <span class="kn">import</span> <span class="n">validate_email</span>
+<span class="kn">from</span> <span class="nn">organization.models</span> <span class="kn">import</span> <span class="n">Person</span><span class="p">,</span> <span class="n">Address</span><span class="p">,</span> <span class="n">Designation</span><span class="p">,</span> <span class="n">Organization</span><span class="p">,</span> <span class="n">OrganizationType</span><span class="p">,</span><span class="n">Phone</span><span class="p">,</span><span class="n">Phone</span><span class="p">,</span><span class="n">VisitingCards</span>
+
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">ModelChoiceField</span><span class="p">,</span> <span class="n">ModelMultipleChoiceField</span>
+
+<span class="kn">import</span> <span class="nn">autocomplete_light</span>
+
+<div class="viewcode-block" id="TypeCreateForm"><a class="viewcode-back" href="../forms.html#forms.TypeCreateForm">[docs]</a><span class="k">class</span> <span class="nc">TypeCreateForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ModelForm to create new organization type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">org</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">())</span>
+<div class="viewcode-block" id="TypeCreateForm.Meta"><a class="viewcode-back" href="../forms.html#forms.TypeCreateForm.Meta">[docs]</a>    <span class="k">class</span>  <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">OrganizationType</span>
+</div></div>
+<div class="viewcode-block" id="OrgCreateForm"><a class="viewcode-back" href="../forms.html#forms.OrgCreateForm">[docs]</a><span class="k">class</span> <span class="nc">OrgCreateForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To create new organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="n">ModelMultipleChoiceField</span><span class="p">(</span><span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">Q</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Individual&quot;</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        while form instantiation,</span>
+<span class="sd">        required fields=[&#39;administrator&#39;,&#39;phone&#39;,&#39;types&#39;]</span>
+<span class="sd">        altered the order of field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrgCreateForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;administrator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;phone&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;types&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keyOrder</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="s">&#39;administrator&#39;</span><span class="p">,</span><span class="s">&#39;types&#39;</span><span class="p">,</span><span class="s">&#39;designations&#39;</span><span class="p">,</span><span class="s">&#39;phone&#39;</span><span class="p">,</span><span class="s">&#39;description&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="OrgCreateForm.Meta"><a class="viewcode-back" href="../forms.html#forms.OrgCreateForm.Meta">[docs]</a>    <span class="k">class</span>  <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;rows&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}),</span>
+        <span class="p">}</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="s">&#39;administrator&#39;</span><span class="p">,</span><span class="s">&#39;designations&#39;</span><span class="p">,</span><span class="s">&#39;phone&#39;</span><span class="p">,</span><span class="s">&#39;description&#39;</span><span class="p">,</span><span class="s">&#39;types&#39;</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="OrgCreateForm.clean_phone"><a class="viewcode-back" href="../forms.html#forms.OrgCreateForm.clean_phone">[docs]</a>    <span class="k">def</span> <span class="nf">clean_phone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Phone number validation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;phone&#39;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(^[+0-9]{1,3})*([0-9]{10,11}$)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">phone</span><span class="p">)</span><span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">phone</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s">&#39;Please enter a valid phone number&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="OrgProfileUpdateForm"><a class="viewcode-back" href="../forms.html#forms.OrgProfileUpdateForm">[docs]</a><span class="k">class</span> <span class="nc">OrgProfileUpdateForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    while form instantiation,</span>
+<span class="sd">    required fields=[&#39;phone&#39;]</span>
+<span class="sd">    altered the order of field</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrgProfileUpdateForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;phone&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keyOrder</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="s">&#39;administrator&#39;</span><span class="p">,</span><span class="s">&#39;types&#39;</span><span class="p">,</span><span class="s">&#39;designations&#39;</span><span class="p">,</span><span class="s">&#39;phone&#39;</span><span class="p">,</span><span class="s">&#39;description&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OrgProfileUpdateForm.Meta"><a class="viewcode-back" href="../forms.html#forms.OrgProfileUpdateForm.Meta">[docs]</a>    <span class="k">class</span>  <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,)</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;rows&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="OrgProfileUpdateForm.clean_phone"><a class="viewcode-back" href="../forms.html#forms.OrgProfileUpdateForm.clean_phone">[docs]</a>    <span class="k">def</span> <span class="nf">clean_phone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Phone number validation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;phone&#39;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(^[+0-9]{1,3})*([0-9]{10,11}$)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">phone</span><span class="p">)</span><span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">phone</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s">&#39;Please enter a valid phone number&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="DesignationCreateForm"><a class="viewcode-back" href="../forms.html#forms.DesignationCreateForm">[docs]</a><span class="k">class</span> <span class="nc">DesignationCreateForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+<div class="viewcode-block" id="DesignationCreateForm.Meta"><a class="viewcode-back" href="../forms.html#forms.DesignationCreateForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Designation</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,)</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;rows&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}),</span>
+        <span class="p">}</span>
+</div></div>
+<div class="viewcode-block" id="UserForm"><a class="viewcode-back" href="../forms.html#forms.UserForm">[docs]</a><span class="k">class</span> <span class="nc">UserForm</span><span class="p">(</span><span class="n">UserCreationForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To create new User</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="UserForm.Meta"><a class="viewcode-back" href="../forms.html#forms.UserForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exluding user name and password field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">)</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;user&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="ChangeUserForm"><a class="viewcode-back" href="../forms.html#forms.ChangeUserForm">[docs]</a><span class="k">class</span> <span class="nc">ChangeUserForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To  alter User infomation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ChangeUserForm.Meta"><a class="viewcode-back" href="../forms.html#forms.ChangeUserForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        fields = [&#39;username&#39;, &#39;first_name&#39;, &#39;last_name&#39;, &#39;email&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="ChangeUserForm.clean_password"><a class="viewcode-back" href="../forms.html#forms.ChangeUserForm.clean_password">[docs]</a>    <span class="k">def</span> <span class="nf">clean_password</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;&quot;</span></div>
+<div class="viewcode-block" id="ChangeUserForm.is_valid_email"><a class="viewcode-back" href="../forms.html#forms.ChangeUserForm.is_valid_email">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_email</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validating email field using Validate_email</span>
+<span class="sd">        from django.core.validators import validate_email</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">validate_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="UserProfileForm"><a class="viewcode-back" href="../forms.html#forms.UserProfileForm">[docs]</a><span class="k">class</span> <span class="nc">UserProfileForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update user profile by admin</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">org</span> <span class="o">=</span> <span class="n">ModelChoiceField</span><span class="p">(</span><span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="n">ModelMultipleChoiceField</span><span class="p">(</span><span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+<div class="viewcode-block" id="UserProfileForm.Meta"><a class="viewcode-back" href="../forms.html#forms.UserProfileForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exclude = [&#39;user&#39;, &#39;address&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Person</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">,</span> <span class="s">&#39;address&#39;</span><span class="p">]</span>
+</div></div>
+<div class="viewcode-block" id="AddressForm"><a class="viewcode-back" href="../forms.html#forms.AddressForm">[docs]</a><span class="k">class</span> <span class="nc">AddressForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AddressForm</span>
+<span class="sd">    all fields=[&#39;city&#39;,&#39;state&#39;,&#39;zip&#39;,&#39;street&#39;,&#39;apartment&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AddressForm.Meta"><a class="viewcode-back" href="../forms.html#forms.AddressForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Address</span>
+</div></div>
+<div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../forms.html#forms.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; file upload form &quot;&quot;&quot;</span>
+    <span class="nb">file</span>  <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">FileField</span><span class="p">()</span> <span class="c">#: FileField</span>
+</div>
+<div class="viewcode-block" id="PersonForm"><a class="viewcode-back" href="../forms.html#forms.PersonForm">[docs]</a><span class="k">class</span> <span class="nc">PersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    person form</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PersonForm.Meta"><a class="viewcode-back" href="../forms.html#forms.PersonForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exclude = [&#39;user&#39;,&#39;address&#39;,&#39;prefix&#39;,&#39;suffix&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">Person</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">,</span><span class="s">&#39;address&#39;</span><span class="p">,</span><span class="s">&#39;prefix&#39;</span><span class="p">,</span><span class="s">&#39;suffix&#39;</span><span class="p">]</span></div>
+<div class="viewcode-block" id="PersonForm.clean_phone"><a class="viewcode-back" href="../forms.html#forms.PersonForm.clean_phone">[docs]</a>    <span class="k">def</span> <span class="nf">clean_phone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        phone number validation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;phone&#39;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(^[+0-9]{1,3})*([0-9]{10,11}$)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">phone</span><span class="p">)</span><span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">phone</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s">&#39;Please enter a valid phone number&#39;</span><span class="p">)</span>
+
+
+
+
+</div></div>
+<div class="viewcode-block" id="PhoneForm"><a class="viewcode-back" href="../forms.html#forms.PhoneForm">[docs]</a><span class="k">class</span> <span class="nc">PhoneForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+<div class="viewcode-block" id="PhoneForm.Meta"><a class="viewcode-back" href="../forms.html#forms.PhoneForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">Phone</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;phone_type&#39;</span><span class="p">]</span>
+</div></div>
+<div class="viewcode-block" id="PhoneTypeForm"><a class="viewcode-back" href="../forms.html#forms.PhoneTypeForm">[docs]</a><span class="k">class</span> <span class="nc">PhoneTypeForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+<div class="viewcode-block" id="PhoneTypeForm.Meta"><a class="viewcode-back" href="../forms.html#forms.PhoneTypeForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span>
+
+</div></div>
+<div class="viewcode-block" id="VisitingCardUpdateForm"><a class="viewcode-back" href="../forms.html#forms.VisitingCardUpdateForm">[docs]</a><span class="k">class</span> <span class="nc">VisitingCardUpdateForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    VisitingCardUpdateForm</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="VisitingCardUpdateForm.Meta"><a class="viewcode-back" href="../forms.html#forms.VisitingCardUpdateForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exclude = [&#39;address&#39;,]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">VisitingCards</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">,]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;designation&#39;</span><span class="p">,</span> <span class="s">&#39;organization&#39;</span><span class="p">,</span> <span class="s">&#39;user&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VisitingCardUpdateForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keyOrder</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;organization&#39;</span><span class="p">,</span><span class="s">&#39;designation&#39;</span><span class="p">,</span><span class="s">&#39;user&#39;</span><span class="p">,</span><span class="s">&#39;email&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="VisitingCardUpdateForm.clean_email"><a class="viewcode-back" href="../forms.html#forms.VisitingCardUpdateForm.clean_email">[docs]</a>    <span class="k">def</span> <span class="nf">clean_email</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validating email field using Validate_email</span>
+<span class="sd">        from django.core.validators import validate_email</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">]</span>
+        <span class="n">validate_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">email</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">crm 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, ravip.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{%block content %}
+<div id="id_content">
+	<div id="id_form" class="text-center">
+		<div class="panel panel-default" style="width:300px">
+			<form name="delete_confirmation" method="post" class="form form-horizontal">
+				{% csrf_token %}
+				<div class="panel-body">
+					Are you sure
+					{{ form.as_p }}
+				</div>
+				<div class="panel-footer">
+					<button  class="btn btn-warning" type=Submit value="yes">Yes</button>
+					<a href="{% url "designation_list" %}" class="btn btn-default">No</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{%endblock%}

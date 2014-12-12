@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-06-17 18:28+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/organization/designation_list.html:26
+msgid "Designations"
+msgstr "Bezeichnungen"
+
+#: templates/organization/designation_list.html:41
+msgid "List of all available designations in the system"
+msgstr "Liste aller verfügbaren Bezeichnungen"
+
+#: templates/organization/organization_list.html:27
+msgid "Organizations"
+msgstr "Unternehmen"
+
+#: templates/organization/organization_list.html:44
+msgid "List of all Organizations in the system"
+msgstr "iListe aller Unternehmen in das System"
+
+#: templates/organization/organizationtype_list.html:25
+msgid "Organization Types"
+msgstr "Organisation Arten"
+
+#: templates/organization/organizationtype_list.html:42
+msgid "Types tell you more about the organization"
+msgstr "Arten erfahren Sie mehr über die Organisation"
+
+#: templates/organization/person_list.html:26
+msgid "Users"
+msgstr "Benutzer"
+
+#: templates/organization/person_list.html:48
+msgid "List of users in the system"
+msgstr "Liste der Benutzer im System"
+
+#: templates/organization/visitingcards_list.html:45
+msgid "Visiting Cards"
+msgstr "Visitenkarten"
+
+#: templates/organization/visitingcards_list.html:65
+msgid "List of all visiting cards"
+msgstr "Liste aller Visitenkarten"

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load base %}
+{% load i18n %}
+{%block content %}
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+<script src="{{ STATIC_URL }}js/bootstrap.js"></script>
+<script src="{{ STATIC_URL }}js/footable.js" type="text/javascript"></script>
+<link href="{{ STATIC_URL }}css/footable.core.min.css" rel="stylesheet" type="text/css" />
+<link href="{{ STATIC_URL }}css/footable.standalone.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+$(document).ready(function(){
+ $("th").click(function(){
+     $(this).children('a')[0].click()
+     });
+$('.footable').footable();
+ });
+</script>
+
+
+
+<div id="id_content">
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">
+            <i class="glyphicon glyphicon-th-list"> {%trans "Organizations" %}</i><!--translator-->
+            <span class="actions" id="my_act">
+                <a href="{%url 'org_add' %}" type="button" title="Add" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i></a>
+            </span>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#srchform">
+                <i class="glyphicon glyphicon-search"></i>
+            </button>
+            <form class="searchform navbar-form navbar-right" method="get" role="search" id="srchform">
+                <div class="form-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search" value="{{ request.GET.search }}" id="txtSearch" onkeyup="searchOpen(this,'/org/')">
+                    <button type="submit" id="frm-submit"/><h6><i class="glyphicon glyphicon-search"></i></h6></button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-body" id="panelbody">
+            {% get_available_languages as languages %}
+            <p>{%trans "List of all Organizations in the system" %}</p>
+        </div>
+        <div class="table-responsive">
+        <!-- Table -->
+        <table class="footable table toggle-circle table-striped table-bordered" id="mytable">
+            <thead>
+                <tr>
+                    <th class="sortable">
+   <a href="{% url 'org_list_all' %}?sort_by=name&sort_order={%ifnotequal sort_on 'name'%}ASC{%else%}{%if srt_ord == 'ASC' %}DESC{% else %}ASC{% endif %}{%endifnotequal%}"></a>Title
+                    {%if sort_on == 'name' %}
+                        {% if srt_ord == 'ASC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-asc.gif" class="pull-right">
+                        {% elif srt_ord == 'DESC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-desc.gif" class="pull-right">
+                        {%endif%}
+                    {% else%}
+                            <img src="{{ STATIC_URL }}fonts/ice-unsorted.gif" class="pull-right">
+                    {%endif%}
+                    </th>    
+
+                    <th class="sortable" data-hide="phone">
+                        <a href="{% url 'org_list_all' %}?sort_by=administrator__first_name&sort_order={%ifnotequal sort_on 'administrator__first_name'%}ASC{%else%}{%if srt_ord == 'ASC' %}DESC{% else %}ASC{% endif %}{%endifnotequal%}"></a>Admin
+                    {%if sort_on == 'administrator__first_name' %}
+                        {% if srt_ord == 'ASC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-asc.gif" class="pull-right">
+                        {% elif srt_ord == 'DESC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-desc.gif" class="pull-right">
+                        {%endif%}
+                    {% else%}
+                            <img src="{{ STATIC_URL }}fonts/ice-unsorted.gif" class="pull-right">
+                    {%endif%}
+                    </th>
+                   
+                    <th class="sortable" data-hide="phone">
+ <a href="{% url 'org_list_all' %}?sort_by=description&sort_order={%ifnotequal sort_on 'description'%}ASC{%else%}{%if srt_ord == 'ASC' %}DESC{% else %}ASC{% endif %}{%endifnotequal%}"></a>Description
+                    {%if sort_on == 'description' %}
+                        {% if srt_ord == 'ASC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-asc.gif" class="pull-right">
+                        {% elif srt_ord == 'DESC' %}
+                            <img src="{{ STATIC_URL }}fonts/ice-desc.gif" class="pull-right">
+                            {%endif%}
+                    {% else%}
+                            <img src="{{ STATIC_URL }}fonts/ice-unsorted.gif" class="pull-right">
+                    {%endif%}
+                    
+                    
+                    </th>
+                    <th data-hide="phone">Types</th>
+                    <th data-hide="phone">Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for obj in object_list %}
+                <tr class="">
+                    <td><a href="{%url 'org_details' obj.id%}">{{obj.name}}</a>
+                        {% if obj.administrator == user or user.is_superuser %}
+                        <div class="pull-right">
+                        <a href="{%url 'orgprofile_update' obj.id%}"><b class="glyphicon glyphicon-pencil">&nbsp;</b></a>
+                        <a href="{% url 'org_del' obj.id %}"><b class="glyphicon glyphicon-trash"></b></a>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>{{obj.administrator.full_name}}</td>
+                    <td>{{obj.description}}</td>
+                    <td>{% for t in obj.types.all%}{{t}}{% if forloop.last %}{%else%},{% endif %}{% endfor %}</td>
+                    <td>{{obj.address}}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan=6>
+                        Empty.
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        </div>
+        {% include "pager.html" %}
+    </div>
+</div>
+
+{%endblock%}
+

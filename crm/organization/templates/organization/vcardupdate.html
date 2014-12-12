@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{%block content %}
+<script type="text/javascript">
+	function disablediv(divid,thiss)
+	{
+		var cid=thiss.id;
+		if(document.getElementById(cid).checked){
+            var nodes = document.getElementById(divid).getElementsByTagName('*');
+            for(var i = 0; i < nodes.length; i++){
+                nodes[i].disabled = false;
+            }
+			document.getElementById(divid).style.display="block";
+		
+        }else{
+            var nodes = document.getElementById(divid).getElementsByTagName('*');
+            for(var i = 0; i < nodes.length; i++){
+                nodes[i].disabled = true;
+                nodes[i].checked = false;
+            }
+			document.getElementById(divid).style.display="none";
+		
+		}
+
+	}
+
+</script>
+
+
+
+
+
+<div id="id_content">
+
+	<form method="post">
+		{% csrf_token %}
+		<div class="panel panel-default">
+			<!-- Default panel contents -->
+			<div class="panel-heading">
+				<i class="glyphicon glyphicon-credit-card">    Visiting Card(s) Update</i>
+			</div>
+			<div class="panel-body">
+               Select Organization
+                <select>
+                    {% for org in organization %}
+                        <option value="{{org}}">{{org}}</option>
+                    {%endfor%}
+                </select>
+                <br> 
+            Select Designation
+            <select>
+            {% for desig in designation %}
+                 <option value="{{desig}}">{{desig}}</option>
+                 
+			{%endfor%}
+            <select>
+			</div>
+		<div class="control-group">
+			<div class="controls">
+				<input type="submit" value="update">
+			</div>
+		</div>
+	</form>
+</div>
+
+{%endblock%}

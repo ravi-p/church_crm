@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{%block content %}
+<div id="id_content">
+    <table class="table table-striped table-condensed">
+        <thead>
+            <td> Name </td>
+            <td> Description </td>
+            <td> Types </td>
+            <td> Address </td>
+        </thead>
+        {%for obj in object_list %}
+            <tr>
+                <td> {{obj.name}} </td>
+                <td> {{obj.description}} </td>
+                <td> {{obj.types.all}} </td>
+                <td> {{obj.Address}} </td>
+            </tr>
+        {%endfor%}
+    </table>
+</div>
+
+{%endblock%}

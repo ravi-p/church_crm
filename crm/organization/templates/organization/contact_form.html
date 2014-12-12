@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{%block content %}
+<div id="id_content">
+    <div id="id_form">
+        <form name="org_form" method="post" class="form form-horizontal">
+            <fieldset>
+                {% csrf_token %}
+                {%for field in form %}
+                <div class="control-group {%if field.errors %}error{%endif%}">
+                    <label class="control-label">{{field.label|title}} 
+                    {% if field.field.required %}{% endif %}</label>
+                    <div class="controls">
+                    {{field}}
+
+                    {#add first error message for a field #}
+                    {%if field.errors %}<span class="help-block">{%for error in field.errors|slice:"1"%} {{error}}{%endfor%}<span>{%endif%}
+                    </div>
+                </div>
+                {%endfor%}
+            </fieldset>
+        </form>
+            
+    </div>
+</div>
+
+{%endblock%}

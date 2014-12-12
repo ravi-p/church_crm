@@ -1,0 +1,13 @@
+Organization.objects.filter().extra(select = {'lower_'+col_nm:'lower('+col_nm+')'}).order_by('lower_'+col_nm)
+ 
+ 
+Organization.objects.extra(select={'eggs_'+'col_nm':'uppper(eggs)',order_by['eggs_upper']})
+ 
+Organization.objects.extra(select={'administrator_upper':'uppper(administrator)',order_by['administrator_upper']})
+  
+Spam.objects.extra(select={'eggs_upper':'uppper(eggs)',order_by['eggs_upper']})
+
+sqlite> select o.name, o.id from organization o join auth_user a on o.administrator_id=a.id order by a.username COLLATE NOCASE ASC;
+
+>>> Organization.objects.raw('select * from organization o,auth_user a on o.administrator_id=a.id order by a.username COLLATE NOCASE ASC')[:]
+

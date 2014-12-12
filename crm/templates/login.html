@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load base %}
+
+{%block content %}
+<section class="row-fluid">
+	<div class="col-md-4" d="content" style="margin-top:15px;">
+		{% if form.errors %}
+		<p>Your username and password didn't match, please try again.</p>
+		{% endif %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Login</h3>
+			</div>
+			<div class="panel-body">
+			<form class="form-horizontal" method="post" action=".">
+				{% csrf_token %}
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_username">Username:</label>
+					<div class="col-sm-9">
+					{{ form.username|addcss:"form-control" }}
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_username">Password:</label>
+					<div class="col-sm-9">
+					{{ form.password|addcss:"form-control" }}
+					</div>
+				</div>
+				{% if next %}
+				<input type="hidden" name="next" value="{{ next }}" />
+				{% else %}
+				<input type="hidden" name="next" value="{% url 'org_list_all' %}" />
+				{% endif %}
+				<button class="btn btn-primary pull-right" type="submit">Login </button>
+				<div class="clearfix">&nbsp;</div>
+			</form>
+			</div>
+		</div>
+	</div>
+</section>
+{%endblock%}

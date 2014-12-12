@@ -1,0 +1,37 @@
+<div >
+    <ul class="pager">
+    {%if page_obj.has_previous %}
+    <li class="previous">
+        {% if request.GET.sort_by %}
+    <a href="?sort_order={{request.GET.sort_order}}&sort_by={{request.GET.sort_by}}&page={{page_obj.previous_page_number}}">&larr;Pre</a>
+        {% elif request.GET.search %}
+    <a href="?search={{request.GET.search}}&page={{page_obj.previous_page_number}}">&larr;Pre</a>
+        {% else %}  
+        <a href="?page={{ page_obj.previous_page_number }}">&larr; Pre</a>
+        {% endif %}
+    </li>
+    {% endif %}
+    <li> Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</li>
+    <br>
+    <li> 
+        {% for p in paginator.page_range %}
+        <a href="?sort_order={{srt_ord}}&sort_by={{sort_on}}&page={{p}}">{%ifequal page_obj.number p%}<u>{{p}}{%else%}{{p}}{%endifequal%}</u></a>
+        {%endfor%}
+
+
+    
+    </li>
+    {% if page_obj.has_next %}
+    <li class="next">
+        {% if request.GET.sort_by %}
+      <a href="?sort_order={{request.GET.sort_order}}&sort_by={{request.GET.sort_by}}&page={{ page_obj.next_page_number }}">Next &rarr;</a>
+        {% elif request.GET.search %}
+      <a href="?search={{request.GET.search}}&page={{ page_obj.next_page_number }}">Next &rarr;</a>
+        {% else %}  
+        <a href="?page={{ page_obj.next_page_number }}">Next &rarr;</a>
+        {% endif %}
+    </li>
+    {% endif %}
+    </ul>
+</div>
+

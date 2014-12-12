@@ -1,0 +1,5 @@
+Hi {{ user }},
+   added you in {{org}} as a {{desig}}
+To know more please login
+http://127.0.0.1:8000/org/list
+-- Django Church Team

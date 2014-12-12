@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+	{% block title %}
+	{{BRAND_NAME|default:"Contacts"}} 
+
+	{% endblock %}
+</title>
+
+{% block css_common %}
+<!--[if lt IE 7]>
+				<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" />
+<![endif]-->
+<link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="{{ STATIC_URL }}css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
+<link href="{{ STATIC_URL }}css/crm.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 780px)" href="{{ STATIC_URL }}css/max-device-width-780px.css" />
+{% endblock %}
+
+{% block page-spec-css %} 
+<script src="{{ STATIC_URL }}js/jquery-1.11.0.min.js"></script>
+<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+{% endblock %}
+
+{% block page-spec-js-head %} 
+<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+<script src="{{ STATIC_URL }}js/bootstrap.js"></script>
+<script src="{{ STATIC_URL }}js/bootstrap-select.min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/crm.js"></script>
+
+
+{% endblock %}
+
+{% block favicon %}
+<link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.ico" />
+{% endblock %}
+</head>
+
+<body>
+{% block header %}
+{% include "header.html" %}
+{% endblock %}
+
+<div class="container" id="body_outer">
+	<div id="page" class="container-fluid">
+		{% block content %}
+		{% endblock %}
+	</div>
+
+</div>
+<footer class="footer">
+	<hr/>
+	<div class="container">
+		{% block footer %}
+		{% include "footer.html" %}
+		{% endblock %}
+	</div>
+</footer>
+
+{% block page-spec-js-footer %} 
+{% endblock %}
+<script type="text/javascript">
+$(document).ready(function() {
+		$('.username a.nobutton').mouseover(function(){$(this)
+			.removeClass('nobutton')}).mouseout(function(){$(this).addClass('nobutton')});
+		});
+</script>
+</body>
+</html>

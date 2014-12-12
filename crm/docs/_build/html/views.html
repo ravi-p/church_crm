@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Auto Generated Documentation For Views &mdash; crm 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="crm 1.0.1 documentation" href="index.html" />
+    <link rel="next" title="Auto Generated Documentation For Forms" href="forms.html" />
+    <link rel="prev" title="Auto Generated Documentation" href="code.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Auto Generated Documentation For Forms"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Auto Generated Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">crm 1.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-views">
+<span id="auto-generated-documentation-for-views"></span><h1>Auto Generated Documentation For Views<a class="headerlink" href="#module-views" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="views.DesignationCreate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">DesignationCreate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#DesignationCreate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.DesignationCreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(CreateView), for create new designation</p>
+<dl class="attribute">
+<dt id="views.DesignationCreate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.DesignationCreate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Designation</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.DesignationDelete">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">DesignationDelete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#DesignationDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.DesignationDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(DeleteView), for delete designation</p>
+<dl class="attribute">
+<dt id="views.DesignationDelete.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.DesignationDelete.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Designation</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.DesignationUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">DesignationUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#DesignationUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.DesignationUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(Updateview), for site admin to update designation</p>
+<dl class="attribute">
+<dt id="views.DesignationUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.DesignationUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Designation</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgCreate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgCreate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgCreate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgCreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixin view which will create new organization</p>
+<dl class="attribute">
+<dt id="views.OrgCreate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.OrgCreate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrgCreateForm</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.OrgCreate.form_invalid">
+<tt class="descname">form_invalid</tt><big>(</big><em>form</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgCreate.form_invalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgCreate.form_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is invalid. Re-renders the context data with the
+data-filled forms and errors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.OrgCreate.form_valid">
+<tt class="descname">form_valid</tt><big>(</big><em>form</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgCreate.form_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgCreate.form_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is valid, and will save new instance to database</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgCreate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgCreate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Organization</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgDelete">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgDelete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>The view which will delete organization,
+org admin and site admin can delete the orgnanization.</p>
+<dl class="attribute">
+<dt id="views.OrgDelete.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgDelete.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Organization</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgProfileUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgProfileUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgProfileUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgProfileUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(Updateview), for organization admin to update his organization profile</p>
+<dl class="method">
+<dt id="views.OrgProfileUpdate.dispatch">
+<tt class="descname">dispatch</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgProfileUpdate.dispatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgProfileUpdate.dispatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permission checking before update organization profile.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgProfileUpdate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.OrgProfileUpdate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrgProfileUpdateForm</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.OrgProfileUpdate.form_invalid">
+<tt class="descname">form_invalid</tt><big>(</big><em>form</em>, <em>address_form</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgProfileUpdate.form_invalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgProfileUpdate.form_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is invalid. Re-renders the context data with the
+data-filled forms and errors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.OrgProfileUpdate.get">
+<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgProfileUpdate.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgProfileUpdate.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP method that will pickup organization profile instance to update,
+if user is not a site admin,administrator field will be excluded.
+because only site admin have rights to alter organization admin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgProfileUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgProfileUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Organization</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.OrgProfileUpdate.post">
+<tt class="descname">post</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgProfileUpdate.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgProfileUpdate.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP method which accept the data filled  and call validation method</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgTypeCreate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgTypeCreate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeCreate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeCreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view (CreateView) to create new organization</p>
+<dl class="method">
+<dt id="views.OrgTypeCreate.form_valid">
+<tt class="descname">form_valid</tt><big>(</big><em>form</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeCreate.form_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeCreate.form_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a form is valid. will display success message after adding org</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgTypeCreate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgTypeCreate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrganizationType</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgTypeDelete">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgTypeDelete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>The view which will delete organization type</p>
+<dl class="attribute">
+<dt id="views.OrgTypeDelete.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgTypeDelete.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrganizationType</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgTypeList">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgTypeList</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeList" title="Permalink to this definition">¶</a></dt>
+<dd><p>to display list of organization</p>
+<dl class="method">
+<dt id="views.OrgTypeList.get_queryset">
+<tt class="descname">get_queryset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeList.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeList.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd><p>will get &#8216;search&#8217; or &#8216;sort_by&#8217; parameter from request,
+based on that objects list is return to template</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgTypeList.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgTypeList.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrganizationType</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgTypeUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgTypeUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgTypeUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgTypeUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The view which will update organization type</p>
+<dl class="attribute">
+<dt id="views.OrgTypeUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgTypeUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrganizationType</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.OrgUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">OrgUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#OrgUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.OrgUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(Updateview), for site admin to update organization</p>
+<dl class="attribute">
+<dt id="views.OrgUpdate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.OrgUpdate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrgCreateForm</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.OrgUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.OrgUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Organization</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.PersonList">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">PersonList</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#PersonList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.PersonList" title="Permalink to this definition">¶</a></dt>
+<dd><p>A List view to display list of user in system</p>
+<dl class="method">
+<dt id="views.PersonList.get_queryset">
+<tt class="descname">get_queryset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/views.html#PersonList.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.PersonList.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd><p>will get &#8216;search&#8217; or &#8216;sort_by&#8217; parameter from request,
+based on that objects list is return to template</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.PersonList.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.PersonList.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Person</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.UserCreate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">UserCreate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#UserCreate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserCreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to create new user,
+only site admin have right to add new user.</p>
+<dl class="attribute">
+<dt id="views.UserCreate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.UserCreate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">UserForm</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.UserCreate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.UserCreate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">User</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.UserDelete">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">UserDelete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#UserDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view(DeleteView), for delete user
+only site admin have right to delete user.</p>
+<dl class="attribute">
+<dt id="views.UserDelete.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.UserDelete.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">User</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.UserUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">UserUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#UserUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to delete user,
+only site admin have right to update user.</p>
+<dl class="attribute">
+<dt id="views.UserUpdate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.UserUpdate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">PersonForm</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.UserUpdate.form_invalid">
+<tt class="descname">form_invalid</tt><big>(</big><em>ppform</em>, <em>address_form</em>, <em>cuform</em><big>)</big><a class="reference internal" href="_modules/views.html#UserUpdate.form_invalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserUpdate.form_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is invalid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.UserUpdate.get_object">
+<tt class="descname">get_object</tt><big>(</big><em>pk</em><big>)</big><a class="reference internal" href="_modules/views.html#UserUpdate.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserUpdate.get_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>overridden method to get instance of person insted of user</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.UserUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.UserUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Person</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.UserUpdate.post">
+<tt class="descname">post</tt><big>(</big><em>request</em>, <em>pk</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#UserUpdate.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.UserUpdate.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP method which accept the data filled  and call validation method</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.VCardDelete">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">VCardDelete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#VCardDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.VCardDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to delete card,
+only site admin and org admin have right to delete visiting card</p>
+<dl class="attribute">
+<dt id="views.VCardDelete.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.VCardDelete.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">VisitingCards</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.VCardList">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">VCardList</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#VCardList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.VCardList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listview to display VisitingCards</p>
+<dl class="method">
+<dt id="views.VCardList.get_queryset">
+<tt class="descname">get_queryset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/views.html#VCardList.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.VCardList.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd><p>will get &#8216;search&#8217;  parameter from request,
+based on that objects list is return to template</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.VCardList.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.VCardList.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">VisitingCards</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="views.VCardUpdate">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">VCardUpdate</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#VCardUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.VCardUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to update visiting card,
+only site admin and org admin have right to update update visiting card</p>
+<dl class="attribute">
+<dt id="views.VCardUpdate.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.VCardUpdate.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">VisitingCardUpdateForm</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.VCardUpdate.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.VCardUpdate.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">VisitingCards</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="views.custom_login">
+<tt class="descclassname">views.</tt><tt class="descname">custom_login</tt><big>(</big><em>request</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#custom_login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.custom_login" title="Permalink to this definition">¶</a></dt>
+<dd><p>will authenticate user and redirect home page if user is valid</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="views.employee_add">
+<tt class="descclassname">views.</tt><tt class="descname">employee_add</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#employee_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.employee_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>function based view,
+organization admin can add users as emp to his organizations</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="views.my_contact_page">
+<em class="property">class </em><tt class="descclassname">views.</tt><tt class="descname">my_contact_page</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>class based generic view.
+user can update his profile</p>
+<dl class="attribute">
+<dt id="views.my_contact_page.form_class">
+<tt class="descname">form_class</tt><a class="headerlink" href="#views.my_contact_page.form_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">PersonForm</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.my_contact_page.form_invalid">
+<tt class="descname">form_invalid</tt><big>(</big><em>ppform</em>, <em>address_form</em>, <em>cuform</em><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page.form_invalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page.form_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is invalid. Re-renders the context data with the
+data-filled forms and errors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.my_contact_page.form_valid">
+<tt class="descname">form_valid</tt><big>(</big><em>ppform</em>, <em>address_form</em>, <em>cuform</em><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page.form_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page.form_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if a form is valid. and update existing instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.my_contact_page.get">
+<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP get method to get profile instance of logged in user</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.my_contact_page.get_object">
+<tt class="descname">get_object</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page.get_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>overridden get_object method to get instance of person</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="views.my_contact_page.model">
+<tt class="descname">model</tt><a class="headerlink" href="#views.my_contact_page.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Person</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="views.my_contact_page.post">
+<tt class="descname">post</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#my_contact_page.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.my_contact_page.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP method which accept the data filled  and call validation method</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="views.org_details">
+<tt class="descclassname">views.</tt><tt class="descname">org_details</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#org_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.org_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>function based view to display org profile and available visiting cards in organization</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="views.user_details">
+<tt class="descclassname">views.</tt><tt class="descname">user_details</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#user_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.user_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>function based view to display user profile and visiting cards the user has</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="views.user_upload">
+<tt class="descclassname">views.</tt><tt class="descname">user_upload</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/views.html#user_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#views.user_upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>To add multiple users at once using cvs file
+only site admin have right to add user</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="code.html"
+                        title="previous chapter">Auto Generated Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="forms.html"
+                        title="next chapter">Auto Generated Documentation For Forms</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/views.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Auto Generated Documentation For Forms"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Auto Generated Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">crm 1.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, ravip.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

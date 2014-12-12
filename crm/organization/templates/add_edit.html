@@ -1,0 +1,89 @@
+{% load base %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.js" type="text/javascript"></script>
+<link href="{{ STATIC_URL }}css/crm.css" rel="stylesheet" type="text/css" />
+
+
+<STYLE type="text/css">
+#form_ajax_error, .errorlist {
+    color: red;
+    padding-left:32%;
+    }
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#visitingcard_form").submit(function(event){
+        event.preventDefault();
+            $.ajax({
+                url: "/org/vcard/{{pk}}/",
+                type: 'POST',
+                data:  $("#visitingcard_form").serialize(),
+                success: function(resp, textStatus, jqXHR){
+                   var my_data = JSON.parse(resp);
+                   var data=my_data['id']
+                   u_id=my_data['u_id']
+                   $("tr#{{pk}} td a:first").html(my_data['usr'])
+                   $("tr#{{pk}} td a:first").attr("href","/org/user/details/"+u_id)
+                   document.getElementById(data).cells[1].innerHTML=my_data['org']
+                   document.getElementById(data).cells[2].innerHTML=my_data['desig']
+                   $("tr#{{pk}}").addClass("success");
+                   setTimeout(function(){
+                        $("tr#{{pk}}").removeClass("success");}, 2000); 
+                        $("#mymodal").find(".close").click();
+                },
+                error: function(resp,textStatus,jqXHR){
+                    $(".errorlist").remove()
+                    $("#form_ajax_error").show();
+                    var errors = JSON.parse(resp.responseText);
+                    for (error in errors) {
+                        var id = '#id_' + error;
+                        $(id).parents().eq(1).prepend(errors[error]);
+                    }
+
+                }
+            });
+    });
+    return false;//remove double click,
+});
+    
+</script>
+
+{%block content %}
+<div class="row-fluid" id="id_content">
+    <div class="col-md-12" id="id_form">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <button type="button" class="close" data-dismiss="modal">×</button>
+              <h3 class="panel-title"> <span class="glyphicon glyphicon-briefcase">Update Card</span>
+              </h3>
+            </div>
+            <div class="panel-body">
+                <form name="visitingcard_form" method="post" class="form form-horizontal" id="visitingcard_form" action="/org/vcard/{{pk}}/">
+                    {% csrf_token %}
+
+                    {{ form.non_field_errors }}
+                    {% for field in form %}
+                            <div class="form-group {%if field.errors %}has-error{%endif%}">
+                                <label class="col-sm-3 control-label">{{field.label|title}}{% if field.field.required %}*{% endif %}</label>
+                            <div class="col-sm-9">
+                            {{field|addcss:"form-control"}}
+                            {%if field.errors %}
+                            <p class="help-block form-control-static">{%for error in field.errors|slice:"1"%} {{error}}{%endfor%}<p>{%endif%}
+                            </div>
+                            </div>
+                    {%endfor%}
+
+
+
+                    <div class="pull-right">
+                    <!--    <a href="{% url 'vcard_list' %}" class="btn btn-default">Cancel</a> -->
+               <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button class="btn btn-primary" type="submit" >Update</button>
+                    </div>
+                    <div class="clearfix">&nbsp;</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}

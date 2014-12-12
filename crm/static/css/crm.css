@@ -1,0 +1,58 @@
+
+body {
+    padding-top: 50px;
+}
+
+.searchform {
+    margin: 0px;
+}
+
+.errorlist {
+    color: rgb(202, 95, 95)
+}
+
+.panel-heading {
+    line-height: 35px;
+}
+
+.panel-heading .glyphicon {
+    word-spacing: -.5em;
+}
+
+.actions {
+    padding-left: 5px;
+}
+
+.attribute_label {
+    text-decoration: italic;
+}
+
+.details_info  label {
+    font-weight: normal;
+    margin-right: 10px;
+    color: #777;
+}
+
+.pager {
+    margin: 0;
+    padding: 20px 0;
+    border-top: 1px solid #ddd;
+}
+
+
+#mymodal {
+    position: fixed; 
+    top: 6%; 
+    right: 15%; 
+    left: 15%; 
+    width: auto; 
+    margin: 0;
+}
+
+.sortable{
+    cursor: pointer;
+}
+
+.sortable:hover{
+    color: blue;
+}

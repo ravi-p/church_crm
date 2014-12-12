@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{%block content %}
+<div id="id_content">
+	<div id="id_form">
+		<form name="org_form" method="post" class="form form-horizontal">
+			{% csrf_token %}
+			<fieldset>
+				<legend>User</legend>
+				{{ form.non_field_errors }}
+				{{ form.as_p }}
+			</fieldset>
+			<div class="control-group {%if field.errors %}error{%endif%}">
+				<div class="controls">
+					{%if object %}
+					<input type="submit" value="Update">
+					{%else%}
+					<input type="submit" value="Add">
+					{%endif%}
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+{%endblock%}

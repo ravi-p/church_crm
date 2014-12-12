@@ -1,0 +1,1188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>views &mdash; crm 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="crm 1.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">crm 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.views.generic.edit</span> <span class="kn">import</span> <span class="n">CreateView</span><span class="p">,</span> <span class="n">UpdateView</span><span class="p">,</span> <span class="n">DeleteView</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">ListView</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span><span class="p">,</span><span class="n">HttpResponse</span><span class="p">,</span><span class="n">HttpRequest</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">django.contrib.messages.views</span> <span class="kn">import</span> <span class="n">SuccessMessageMixin</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">post_save</span><span class="p">,</span> <span class="n">post_delete</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.views</span> <span class="kn">import</span> <span class="n">login</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="c">#from django.contrib.auth.forms import UserCreationForm</span>
+<span class="kn">from</span> <span class="nn">django.dispatch</span> <span class="kn">import</span> <span class="n">receiver</span>
+<span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">method_decorator</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">organization.models</span> <span class="kn">import</span> <span class="n">Organization</span><span class="p">,</span> <span class="n">OrganizationType</span><span class="p">,</span> <span class="n">Designation</span><span class="p">,</span> <span class="n">Person</span><span class="p">,</span> <span class="n">OrganizationType</span><span class="p">,</span> <span class="n">VisitingCards</span><span class="p">,</span> <span class="n">Address</span><span class="p">,</span><span class="n">Phone</span><span class="p">,</span><span class="n">PhoneType</span>
+
+<span class="kn">from</span> <span class="nn">organization.forms</span> <span class="kn">import</span> <span class="n">AddressForm</span><span class="p">,</span> <span class="n">DesignationCreateForm</span><span class="p">,</span> <span class="n">OrgCreateForm</span><span class="p">,</span> <span class="n">UserForm</span><span class="p">,</span> <span class="n">ChangeUserForm</span><span class="p">,</span> <span class="n">UploadFileForm</span><span class="p">,</span> <span class="n">PersonForm</span><span class="p">,</span><span class="n">VisitingCardUpdateForm</span>
+
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">StreamingHttpResponse</span><span class="p">,</span><span class="n">HttpResponseBadRequest</span><span class="p">,</span><span class="n">HttpResponseServerError</span>
+<span class="kn">from</span> <span class="nn">organization.forms</span> <span class="kn">import</span> <span class="n">OrgProfileUpdateForm</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">send_mail</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">thread</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">django.template.loader</span> <span class="kn">import</span> <span class="n">get_template</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="custom_login"><a class="viewcode-back" href="../views.html#views.custom_login">[docs]</a><span class="k">def</span> <span class="nf">custom_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    will authenticate user and redirect home page if user is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_REDIRECT_URL</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgTypeList"><a class="viewcode-back" href="../views.html#views.OrgTypeList">[docs]</a><span class="k">class</span> <span class="nc">OrgTypeList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    to display list of organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">OrganizationType</span>
+    <span class="n">paginate_by</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;sort_on&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;srt_ord&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+<div class="viewcode-block" id="OrgTypeList.get_queryset"><a class="viewcode-back" href="../views.html#views.OrgTypeList.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        will get &#39;search&#39; or &#39;sort_by&#39; parameter from request,</span>
+<span class="sd">        based on that objects list is return to template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">col_nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_by&#39;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">col_nm</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_order&#39;</span><span class="p">,</span> <span class="s">&quot;ASC&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span><span class="o">=</span><span class="n">sort_order</span>
+        <span class="k">if</span> <span class="n">search_str</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">description__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">a</span> <span class="o">|</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">OrganizationType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span><span class="o">.</span><span class="n">extra</span><span class="p">(</span>
+                <span class="n">select</span> <span class="o">=</span> <span class="p">{</span><span class="n">col_nm</span><span class="p">:</span><span class="s">&#39;lower(&#39;</span><span class="o">+</span><span class="n">col_nm</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">objects</span>
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="n">srch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">srch</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">search_q</span> <span class="o">=</span> <span class="n">OrganizationType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q</span><span class="p">]</span>
+                <span class="n">search_q</span><span class="o">=</span><span class="n">OrganizationType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">description__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">)</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+                <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgTypeCreate"><a class="viewcode-back" href="../views.html#views.OrgTypeCreate">[docs]</a><span class="k">class</span> <span class="nc">OrgTypeCreate</span><span class="p">(</span><span class="n">CreateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view (CreateView) to create new organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">OrganizationType</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;create_type.html&#39;</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/orgtype/list&quot;</span>
+
+<div class="viewcode-block" id="OrgTypeCreate.form_valid"><a class="viewcode-back" href="../views.html#views.OrgTypeCreate.form_valid">[docs]</a>    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when a form is valid. will display success message after adding org</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Organization Type, &#39;</span><span class="si">%s</span><span class="s">&#39;, added successfully&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgTypeUpdate"><a class="viewcode-back" href="../views.html#views.OrgTypeUpdate">[docs]</a><span class="k">class</span> <span class="nc">OrgTypeUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The view which will update organization type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">OrganizationType</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;add_edit.html&#39;</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/orgtype/list&quot;</span>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OrgTypeDelete"><a class="viewcode-back" href="../views.html#views.OrgTypeDelete">[docs]</a><span class="k">class</span> <span class="nc">OrgTypeDelete</span><span class="p">(</span><span class="n">DeleteView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The view which will delete organization type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">OrganizationType</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/orgtype/list&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgTypeDelete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgCreate"><a class="viewcode-back" href="../views.html#views.OrgCreate">[docs]</a><span class="k">class</span> <span class="nc">OrgCreate</span><span class="p">(</span><span class="n">SuccessMessageMixin</span><span class="p">,</span> <span class="n">CreateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mixin view which will create new organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;create_org.html&#39;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">OrgCreateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/list/&quot;</span>
+    <span class="n">success_message</span> <span class="o">=</span> <span class="s">&quot;Organization </span><span class="se">\&quot;</span><span class="si">%(name)s</span><span class="se">\&quot;</span><span class="s"> was created successfully&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrgCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">form_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">form_class</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OrgCreate.form_valid"><a class="viewcode-back" href="../views.html#views.OrgCreate.form_valid">[docs]</a>    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is valid, and will save new instance to database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">administrator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_success_url</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="OrgCreate.form_invalid"><a class="viewcode-back" href="../views.html#views.OrgCreate.form_invalid">[docs]</a>    <span class="k">def</span> <span class="nf">form_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is invalid. Re-renders the context data with the</span>
+<span class="sd">        data-filled forms and errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">))</span>
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="c">#if not request.user.is_superuser:</span>
+        <span class="c">#    messages.error(request, &quot;Permission Error&quot;)</span>
+        <span class="c">#    return HttpResponseRedirect(&quot;/org/list/&quot;)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgUpdate"><a class="viewcode-back" href="../views.html#views.OrgUpdate">[docs]</a><span class="k">class</span> <span class="nc">OrgUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(Updateview), for site admin to update organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;create_org.html&#39;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">OrgCreateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/list/&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgProfileUpdate"><a class="viewcode-back" href="../views.html#views.OrgProfileUpdate">[docs]</a><span class="k">class</span> <span class="nc">OrgProfileUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(Updateview), for organization admin to update his organization profile</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;edit_org_profile.html&#39;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">OrgProfileUpdateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/list/&quot;</span>
+
+   <span class="c"># def get_form(formclass,request):</span>
+   <span class="c">#     if formclass.exclude:</span>
+   <span class="c">#         if not request.user.is_superuser:</span>
+   <span class="c">#             formclass.exclude.append(&#39;administrator&#39;)</span>
+   <span class="c">#     return super(OrgProfileUpdate,self).get_form(formclass, request)</span>
+
+
+<div class="viewcode-block" id="OrgProfileUpdate.get"><a class="viewcode-back" href="../views.html#views.OrgProfileUpdate.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        HTTP method that will pickup organization profile instance to update,</span>
+<span class="sd">        if user is not a site admin,administrator field will be excluded.</span>
+<span class="sd">        because only site admin have rights to alter organization admin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">opform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">opform</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;administrator&#39;</span><span class="p">]</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span>
+                <span class="n">form</span><span class="o">=</span><span class="n">opform</span><span class="p">,</span>
+                <span class="n">address_form</span><span class="o">=</span><span class="n">addrform</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrgProfileUpdate.post"><a class="viewcode-back" href="../views.html#views.OrgProfileUpdate.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        HTTP method which accept the data filled  and call validation method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">opform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">opform</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;administrator&#39;</span><span class="p">]</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span>
+                <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s">&#39;types&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desigs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s">&#39;designations&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">opform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">addrform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">opform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">opform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">address_form</span><span class="p">):</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">address_form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is valid. and update existing instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">org</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="c"># Clear current types</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="c"># Add selected types</span>
+        <span class="n">new_types</span> <span class="o">=</span> <span class="n">OrganizationType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">)</span>
+        <span class="nb">map</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">new_types</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">org</span><span class="o">.</span><span class="n">address</span><span class="p">:</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">addr</span>
+
+        <span class="c"># Check if designations changed</span>
+        <span class="n">current_desigs</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">designations</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;pk&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">new_desigs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">desigs</span><span class="p">)</span>
+        <span class="n">del_desigs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_desigs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">new_desigs</span><span class="p">))</span>
+        <span class="n">add_desigs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">new_desigs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">current_desigs</span><span class="p">))</span>
+
+        <span class="c"># for each del_desig remove all the visiting cards as well.</span>
+        <span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organization</span><span class="o">=</span><span class="n">org</span><span class="p">,</span> <span class="n">designation__in</span><span class="o">=</span><span class="n">del_desigs</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+        <span class="c"># Add new desigs if any</span>
+        <span class="nb">map</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">designations</span><span class="o">.</span><span class="n">remove</span><span class="p">,</span> <span class="n">del_desigs</span><span class="p">)</span>
+        <span class="nb">map</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">designations</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">add_desigs</span><span class="p">)</span>
+
+        <span class="n">org</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_success_url</span><span class="p">())</span>
+
+<div class="viewcode-block" id="OrgProfileUpdate.form_invalid"><a class="viewcode-back" href="../views.html#views.OrgProfileUpdate.form_invalid">[docs]</a>    <span class="k">def</span> <span class="nf">form_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">address_form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is invalid. Re-renders the context data with the</span>
+<span class="sd">        data-filled forms and errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span>
+                                  <span class="n">address_form</span><span class="o">=</span><span class="n">address_form</span><span class="p">))</span>
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+<div class="viewcode-block" id="OrgProfileUpdate.dispatch"><a class="viewcode-back" href="../views.html#views.OrgProfileUpdate.dispatch">[docs]</a>    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permission checking before update organization profile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="ow">in</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">administrator</span><span class="o">=</span><span class="n">user</span><span class="p">):</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Permission Error&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&quot;/org/list/&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgProfileUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div></div>
+<span class="k">class</span> <span class="nc">OrgList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+    <span class="n">paginate_by</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;organization/organization_list.html&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;sort_on&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;srt_ord&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        will get &#39;search&#39; or &#39;sort_by&#39; parameter from request,</span>
+<span class="sd">        based on that objects list is return to template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">)</span>
+        <span class="n">col_nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_by&#39;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">col_nm</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_order&#39;</span><span class="p">,</span> <span class="s">&quot;ASC&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span><span class="o">=</span><span class="n">sort_order</span>
+
+        <span class="k">if</span> <span class="n">search_str</span><span class="p">:</span>
+            <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">name__icontains</span><span class="o">=</span><span class="n">search_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">administrator__first_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">administrator__last_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">administrator__username__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">types__name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">description__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">a</span> <span class="o">|</span> <span class="n">b</span> <span class="o">|</span> <span class="n">c</span> <span class="o">|</span> <span class="n">d</span> <span class="o">|</span> <span class="n">e</span> <span class="o">|</span> <span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span> <span class="c"># SORTING BY COL_NM</span>
+            <span class="k">if</span> <span class="n">col_nm</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="p">:</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span><span class="o">.</span><span class="n">extra</span><span class="p">(</span>
+                    <span class="n">select</span> <span class="o">=</span> <span class="p">{</span><span class="n">col_nm</span><span class="p">:</span><span class="s">&#39;lower(&#39;</span><span class="o">+</span><span class="n">col_nm</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                    <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">col_nm</span> <span class="o">==</span><span class="s">&#39;administrator__first_name&#39;</span><span class="p">:</span>
+                <span class="n">objects</span><span class="o">=</span><span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                    <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">objects</span><span class="o">=</span><span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">extra</span><span class="p">(</span><span class="n">select</span><span class="o">=</span>
+                    <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span><span class="s">&#39;lower(name)&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">objects</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="n">srch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;search&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">srch</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">search_q1</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q1</span><span class="p">]</span>
+                <span class="n">search_q2</span> <span class="o">=</span> <span class="n">OrganizationType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q2</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+                <span class="n">search_q4</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                        <span class="n">description__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q4</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+                <span class="n">search_q3</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">first_name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;first_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q3</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+                <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OrgDelete"><a class="viewcode-back" href="../views.html#views.OrgDelete">[docs]</a><span class="k">class</span> <span class="nc">OrgDelete</span><span class="p">(</span><span class="n">SuccessMessageMixin</span><span class="p">,</span> <span class="n">DeleteView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The view which will delete organization,</span>
+<span class="sd">    org admin and site admin can delete the orgnanization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Organization</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/list&quot;</span>
+    <span class="n">success_message</span> <span class="o">=</span> <span class="s">&quot;Organization deleted successfully&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrgDelete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<span class="k">class</span> <span class="nc">DesignationList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Designation</span>
+    <span class="n">paginate_by</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">description</span><span class="o">=</span><span class="s">&#39;description&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">DesignationList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;temp&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;sort_on&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;srt_ord&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        will get &#39;search&#39; or &#39;sort_by&#39; parameter from request,</span>
+<span class="sd">        based on that objects list is return to template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">col_nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_by&#39;</span><span class="p">,</span> <span class="s">&#39;title&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">col_nm</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_order&#39;</span><span class="p">,</span> <span class="s">&#39;ASC&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span><span class="o">=</span><span class="n">sort_order</span>
+        <span class="k">if</span> <span class="n">search_str</span><span class="p">:</span>
+            <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">title__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">description__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">a</span> <span class="o">|</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># SORTING BY COL_NM</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span><span class="o">.</span><span class="n">extra</span><span class="p">(</span>
+                <span class="n">select</span> <span class="o">=</span> <span class="p">{</span><span class="n">col_nm</span><span class="p">:</span><span class="s">&#39;lower(&#39;</span><span class="o">+</span><span class="n">col_nm</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">objects</span>
+
+
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="n">srch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;search&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">srch</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">search_q</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q</span><span class="p">]</span>
+                <span class="n">search_q</span><span class="o">=</span><span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">description__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">)</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+                <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DesignationList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DesignationUpdate"><a class="viewcode-back" href="../views.html#views.DesignationUpdate">[docs]</a><span class="k">class</span> <span class="nc">DesignationUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(Updateview), for site admin to update designation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Designation</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;add_edit_org.html&#39;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">DesignationCreateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/designation/list/&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DesignationUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DesignationCreate"><a class="viewcode-back" href="../views.html#views.DesignationCreate">[docs]</a><span class="k">class</span> <span class="nc">DesignationCreate</span><span class="p">(</span><span class="n">CreateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(CreateView), for create new designation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;create_designation.html&#39;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Designation</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">DesignationCreateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/designation/list/&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DesignationCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DesignationDelete"><a class="viewcode-back" href="../views.html#views.DesignationDelete">[docs]</a><span class="k">class</span> <span class="nc">DesignationDelete</span><span class="p">(</span><span class="n">DeleteView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(DeleteView), for delete designation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Designation</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/designation/list/&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DesignationDelete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PersonList"><a class="viewcode-back" href="../views.html#views.PersonList">[docs]</a><span class="k">class</span> <span class="nc">PersonList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A List view to display list of user in system</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Person</span>
+    <span class="n">paginate_by</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PersonList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;sort_on&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;srt_ord&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span>
+        <span class="k">return</span> <span class="n">context</span>
+<div class="viewcode-block" id="PersonList.get_queryset"><a class="viewcode-back" href="../views.html#views.PersonList.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        will get &#39;search&#39; or &#39;sort_by&#39; parameter from request,</span>
+<span class="sd">        based on that objects list is return to template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">col_nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_by&#39;</span><span class="p">,</span> <span class="s">&quot;user__username&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">col_nm</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_order&#39;</span><span class="p">,</span> <span class="s">&quot;ASC&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span><span class="o">=</span><span class="n">sort_order</span>
+        <span class="k">if</span> <span class="n">search_str</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__first_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__last_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__username__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__email__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">title__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">a</span> <span class="o">|</span> <span class="n">b</span> <span class="o">|</span> <span class="n">c</span> <span class="o">|</span> <span class="n">d</span> <span class="o">|</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">col_nm</span><span class="p">:</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">objects</span>
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="n">srch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;search&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">srch</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">search_q1</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q1</span><span class="p">]</span>
+                <span class="n">search_q2</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">email__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;email&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q2</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+                <span class="n">search_q3</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">first_name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;first_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q3</span><span class="p">]</span>
+                <span class="n">search_q4</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">last_name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&#39;last_name&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;last_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">search_q4</span><span class="p">]</span>
+                <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="o">+</span><span class="n">temp</span>
+                <span class="n">results</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+                <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PersonList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserCreate"><a class="viewcode-back" href="../views.html#views.UserCreate">[docs]</a><span class="k">class</span> <span class="nc">UserCreate</span><span class="p">(</span><span class="n">CreateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    View to create new user,</span>
+<span class="sd">    only site admin have right to add new user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&quot;create_user.html&quot;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">UserForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&#39;/org/user/list&#39;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserCreate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserUpdate"><a class="viewcode-back" href="../views.html#views.UserUpdate">[docs]</a><span class="k">class</span> <span class="nc">UserUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span> <span class="c"># for each user by admin</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    View to delete user,</span>
+<span class="sd">    only site admin have right to update user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Person</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&quot;edit_user_profile.html&quot;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">PersonForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&#39;/org/user/list&#39;</span>
+
+<div class="viewcode-block" id="UserUpdate.get_object"><a class="viewcode-back" href="../views.html#views.UserUpdate.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pk</span><span class="p">):</span>
+       <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       overridden method to get instance of person insted of user</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+       <span class="c"># return Person.objects.get(user=self.request.user)</span>
+       <span class="n">p</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+       <span class="k">return</span> <span class="n">p</span>
+</div>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span><span class="n">pk</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">ppform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">cuform</span> <span class="o">=</span> <span class="n">ChangeUserForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">ppform</span><span class="o">=</span><span class="n">ppform</span><span class="p">,</span><span class="n">address_form</span><span class="o">=</span><span class="n">addrform</span><span class="p">,</span><span class="n">cuform</span><span class="o">=</span><span class="n">cuform</span><span class="p">))</span>
+
+<div class="viewcode-block" id="UserUpdate.post"><a class="viewcode-back" href="../views.html#views.UserUpdate.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span><span class="n">pk</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        HTTP method which accept the data filled  and call validation method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">ppform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">cuform</span> <span class="o">=</span> <span class="n">ChangeUserForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ppform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">addrform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">cuform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">ppform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">,</span> <span class="n">cuform</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">ppform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">,</span><span class="n">cuform</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppform</span><span class="p">,</span> <span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="p">):</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">address_form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">cuformo</span> <span class="o">=</span> <span class="n">cuform</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">ppform</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">cuformo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_success_url</span><span class="p">())</span>
+
+<div class="viewcode-block" id="UserUpdate.form_invalid"><a class="viewcode-back" href="../views.html#views.UserUpdate.form_invalid">[docs]</a>    <span class="k">def</span> <span class="nf">form_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppform</span><span class="p">,</span> <span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">ppform</span><span class="o">=</span><span class="n">ppform</span><span class="p">,</span>
+            <span class="n">address_form</span><span class="o">=</span><span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="o">=</span><span class="n">cuform</span><span class="p">))</span>
+
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserDelete"><a class="viewcode-back" href="../views.html#views.UserDelete">[docs]</a><span class="k">class</span> <span class="nc">UserDelete</span><span class="p">(</span><span class="n">DeleteView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view(DeleteView), for delete user</span>
+<span class="sd">    only site admin have right to delete user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/user/list&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserDelete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VCardList"><a class="viewcode-back" href="../views.html#views.VCardList">[docs]</a><span class="k">class</span> <span class="nc">VCardList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Listview to display VisitingCards</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">VisitingCards</span>
+    <span class="n">paginate_by</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;organization/visitingcards_list.html&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span><span class="o">=</span><span class="nb">super</span><span class="p">(</span><span class="n">VCardList</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;sort_on&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;srt_ord&#39;</span><span class="p">]</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span>
+        <span class="k">return</span> <span class="n">context</span>
+<div class="viewcode-block" id="VCardList.get_queryset"><a class="viewcode-back" href="../views.html#views.VCardList.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        will get &#39;search&#39;  parameter from request,</span>
+<span class="sd">        based on that objects list is return to template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">col_nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_by&#39;</span><span class="p">,</span> <span class="s">&quot;user&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">col_nm</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sort_order&#39;</span><span class="p">,</span> <span class="s">&quot;ASC&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_ordr</span><span class="o">=</span><span class="n">sort_order</span>
+        <span class="k">if</span> <span class="n">search_str</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__first_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__last_name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">user__username__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">organization__name__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">designation__title__icontains</span> <span class="o">=</span> <span class="n">search_str</span><span class="p">)</span>
+            <span class="n">object_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">a</span> <span class="o">|</span> <span class="n">b</span> <span class="o">|</span> <span class="n">c</span> <span class="o">|</span> <span class="n">d</span> <span class="o">|</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objects</span><span class="o">=</span><span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">col_nm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s">&quot;DESC&quot;</span><span class="p">:</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">objects</span>
+</div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="n">srch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;search&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">srch</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">search_q1</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span>
+                <span class="n">search_q2</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">first_name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span>
+                <span class="n">search_q3</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="n">srch</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search_q1</span><span class="p">:</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search_q2</span><span class="p">:</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">first_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search_q3</span><span class="p">:</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+                <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">VCardList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VCardUpdate"><a class="viewcode-back" href="../views.html#views.VCardUpdate">[docs]</a><span class="k">class</span> <span class="nc">VCardUpdate</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    View to update visiting card,</span>
+<span class="sd">    only site admin and org admin have right to update update visiting card</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">VisitingCards</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;add_edit.html&#39;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">VisitingCardUpdateForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/vcard/list&quot;</span>
+
+    <span class="c">#def get_queryset(self):</span>
+    <span class="c">#    organization=Organization.objects.filter(administrator=self.request.user)</span>
+    <span class="c">#    return VisitingCards.objects.filter(organization=organization)</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span><span class="n">pk</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="k">print</span> <span class="s">&#39;ajax Get&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span><span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span><span class="n">pk</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_ajax</span><span class="p">():</span>
+            <span class="k">print</span> <span class="s">&#39;ajax Post&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+            <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">form</span><span class="p">,</span><span class="n">pk</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;no ajax call&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+            <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">form</span><span class="p">):</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">update_dict</span><span class="o">=</span><span class="p">{}</span>
+        <span class="n">desig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">designation</span><span class="o">.</span><span class="n">title</span>
+        <span class="n">org</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">usr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span>
+        <span class="n">u_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">update_dict</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;org&#39;</span><span class="p">:</span><span class="n">org</span><span class="p">,</span><span class="s">&#39;desig&#39;</span><span class="p">:</span><span class="n">desig</span><span class="p">,</span><span class="s">&#39;usr&#39;</span><span class="p">:</span><span class="n">usr</span><span class="p">,</span><span class="s">&#39;u_id&#39;</span><span class="p">:</span><span class="n">u_id</span><span class="p">,</span><span class="s">&#39;id&#39;</span><span class="p">:</span><span class="nb">id</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">update_dict</span><span class="p">))</span>
+        <span class="c">#return HttpResponse(self.object.id)</span>
+
+    <span class="k">def</span> <span class="nf">form_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">form</span><span class="p">,</span><span class="n">pk</span><span class="p">):</span>
+        <span class="c">#return self.render_to_response(self.get_context_data(form=form,pk=pk))</span>
+        <span class="n">errors_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">error</span><span class="p">]</span>
+                <span class="n">errors_dict</span><span class="p">[</span><span class="n">error</span><span class="p">]</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="c">#return HttpResponseBadRequest(json.dumps(errors_dict))</span>
+        <span class="k">return</span> <span class="n">HttpResponseServerError</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">errors_dict</span><span class="p">))</span>
+
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">organization</span> <span class="ow">in</span> \
+            <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">administrator</span><span class="o">=</span><span class="n">user</span><span class="p">):</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Permission Error&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&quot;/org/list/&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">VCardUpdate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="c">#def VCardUpdate(request,pk):</span>
+<span class="c">#    if request.method == &quot;GET&quot;:</span>
+<span class="c">#        vcard=VisitingCards.objects.get(pk=pk)</span>
+<span class="c">#        organization = Organization.objects.filter(administrator=request.user)</span>
+<span class="c">#        desig_list = organization.values_list(&#39;designations&#39;, flat=True)</span>
+<span class="c">#        designation = Designation.objects.filter(pk__in=desig_list)</span>
+<span class="c">#        return render_to_response(&#39;organization/vcardupdate.html&#39;,</span>
+<span class="c">#            {&#39;organization&#39;: organization,&#39;designation&#39;:designation},</span>
+<span class="c">#            context_instance=RequestContext(request))</span>
+<span class="c">#</span>
+
+</div>
+<div class="viewcode-block" id="VCardDelete"><a class="viewcode-back" href="../views.html#views.VCardDelete">[docs]</a><span class="k">class</span> <span class="nc">VCardDelete</span><span class="p">(</span><span class="n">DeleteView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    View to delete card,</span>
+<span class="sd">    only site admin and org admin have right to delete visiting card</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">VisitingCards</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/vcard/list/&quot;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">organization</span> <span class="ow">in</span> \
+            <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">administrator</span><span class="o">=</span><span class="n">user</span><span class="p">):</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Permission Error&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&quot;/org/list/&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">VCardDelete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="employee_add"><a class="viewcode-back" href="../views.html#views.employee_add">[docs]</a><span class="k">def</span> <span class="nf">employee_add</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    function based view,</span>
+<span class="sd">    organization admin can add users as emp to his organizations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;GET&quot;</span><span class="p">:</span>
+        <span class="n">employee</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="n">orgs</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">administrator</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="c">#desig_list = orgs.values_list(&#39;designations&#39;, flat=True)</span>
+        <span class="c">#designations = Designation.objects.filter(pk__in=desig_list)</span>
+
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;organization/employee_add1.html&#39;</span><span class="p">,</span>
+            <span class="p">{</span><span class="s">&#39;employee&#39;</span><span class="p">:</span><span class="n">employee</span><span class="p">,</span> <span class="s">&#39;orgs&#39;</span><span class="p">:</span> <span class="n">orgs</span><span class="p">},</span>
+            <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;employee_id&#39;</span><span class="p">)</span>
+    <span class="n">org</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;add2orgs&#39;</span><span class="p">)</span> <span class="c"># id of selected org</span>
+    <span class="n">designations_list</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s">&#39;designations2add&#39;</span><span class="p">)</span><span class="c">#list of ids of selected designation</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span><span class="c"># emp obj to add</span>
+        <span class="n">org</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">org</span><span class="p">)</span><span class="c">#selected org objects</span>
+        <span class="n">designations</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="n">designations_list</span><span class="p">)</span><span class="c">#convert desig id in obj</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c"># log this error</span>
+        <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">org</span> <span class="o">=</span> <span class="n">designations</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">user</span> <span class="ow">and</span> <span class="n">designations</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+        <span class="c"># add error message.</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Select atleast one Organization and its Designation&quot;</span><span class="p">)</span>
+        <span class="c"># redirect to the same page.</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">send_email</span><span class="p">():</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="s">&#39;organization/confirmation_email.txt&#39;</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s">&#39;user&#39;</span><span class="p">:</span><span class="n">user</span><span class="p">,</span><span class="s">&#39;org&#39;</span><span class="p">:</span><span class="n">o</span><span class="o">.</span><span class="n">organization</span><span class="p">,</span><span class="s">&#39;desig&#39;</span><span class="p">:</span><span class="n">desig</span><span class="p">})</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="s">u&#39;confirmation email&#39;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span><span class="n">message</span><span class="p">,</span><span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_FROM_EMAIL</span><span class="p">,[</span><span class="s">&#39;ravirajmca12@gmail.com&#39;</span><span class="p">])</span>
+
+    <span class="c"># create  visiting card(s) for the employee</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">desig</span> <span class="ow">in</span> <span class="n">designations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">desig</span> <span class="ow">in</span> <span class="n">org</span><span class="o">.</span><span class="n">designations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">o</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">organization</span><span class="o">=</span><span class="n">org</span><span class="p">,</span>
+                    <span class="n">designation</span><span class="o">=</span><span class="n">desig</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">c</span><span class="p">:</span>
+                    <span class="c">#send_email()</span>
+                    <span class="n">t</span><span class="o">=</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">send_email</span><span class="p">)</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="s">&quot;Employee Added Succefully..!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="s">&quot; </span><span class="si">%s</span><span class="s"> Already Added ..!&quot;</span> <span class="o">%</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> Doesnt have selected designation </span><span class="si">%s</span><span class="s"> .!&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">orgs</span><span class="p">,</span> <span class="n">desig</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">()</span>
+
+
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="s">&quot;something went wroung &quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&quot;/org/user/list&quot;</span><span class="p">)</span>
+
+
+
+
+
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="user_details"><a class="viewcode-back" href="../views.html#views.user_details">[docs]</a><span class="k">def</span> <span class="nf">user_details</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    function based view to display user profile and visiting cards the user has</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="n">maps</span> <span class="o">=</span> <span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">Q</span><span class="p">(</span><span class="n">designation__title</span><span class="o">=</span><span class="s">&#39;Individual&#39;</span><span class="p">))</span>
+    <span class="n">orgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">organization</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">]</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">designation</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">]</span>
+
+    <span class="c"># Remove None objects</span>
+    <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">is_not</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">is_not</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span><span class="n">designations</span><span class="p">)</span>
+    <span class="n">orgs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">orgs</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;organization/user_details.html&#39;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s">&quot;orgs&quot;</span><span class="p">:</span> <span class="n">orgs</span><span class="p">,</span> <span class="s">&quot;maps&quot;</span><span class="p">:</span> <span class="n">maps</span><span class="p">,</span> <span class="s">&quot;designations&quot;</span><span class="p">:</span> <span class="n">designations</span><span class="p">,</span> <span class="s">&quot;puser&quot;</span><span class="p">:</span> <span class="n">user</span><span class="p">},</span>
+        <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="org_details"><a class="viewcode-back" href="../views.html#views.org_details">[docs]</a><span class="k">def</span> <span class="nf">org_details</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">org_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    function based view to display org profile and available visiting cards in organization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">org</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">org_id</span><span class="p">)</span>
+    <span class="n">maps</span> <span class="o">=</span> <span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organization</span><span class="o">=</span><span class="n">org</span><span class="p">)</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">designation</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">]</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">user</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">]</span>
+    <span class="c"># Remove None objects</span>
+    <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">is_not</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="n">designations</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">is_not</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span><span class="n">designations</span><span class="p">)</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">is_not</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span><span class="n">users</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;organization/details.html&#39;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s">&quot;org&quot;</span><span class="p">:</span> <span class="n">org</span><span class="p">,</span> <span class="s">&quot;maps&quot;</span><span class="p">:</span> <span class="n">maps</span><span class="p">,</span> <span class="s">&quot;designations&quot;</span><span class="p">:</span> <span class="n">designations</span><span class="p">,</span> <span class="s">&quot;users&quot;</span><span class="p">:</span><span class="n">users</span><span class="p">},</span>
+        <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="user_upload"><a class="viewcode-back" href="../views.html#views.user_upload">[docs]</a><span class="k">def</span> <span class="nf">user_upload</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To add multiple users at once using cvs file</span>
+<span class="sd">    only site admin have right to add user</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+
+        <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&#39;login&#39;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">UploadFileForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">_handle_uploaded_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">[</span><span class="s">&#39;file&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&#39;user_list&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Invalid file </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;upload_file.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;form&quot;</span><span class="p">:</span> <span class="n">UploadFileForm</span><span class="p">()},</span>
+        <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</div>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">User</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">create_user_profile</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+        <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+        <span class="n">designation</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">VisitingCards</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">designation</span><span class="o">=</span><span class="n">designation</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_delete</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Organization</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">delete_org_address</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">using</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">address</span><span class="p">:</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&quot;Error deleting address associated to org &lt;br/&gt;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_handle_uploaded_file</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">gen_password</span><span class="p">():</span>
+        <span class="c"># set username as the password</span>
+        <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s">&quot;username&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">check_record</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid record&quot;</span><span class="p">)</span>
+
+    <span class="n">ufile</span> <span class="o">=</span> <span class="s">&#39;/tmp/user_list.txt&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ufile</span><span class="p">,</span> <span class="s">&#39;wb+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">destination</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">chunks</span><span class="p">():</span>
+            <span class="n">destination</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">destination</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="kn">import</span> <span class="nn">csv</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ufile</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+        <span class="n">spamreader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spamreader</span><span class="o">.</span><span class="n">next</span><span class="p">()]</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">spamreader</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">headers</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+            <span class="c"># check if required files are populated.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">check_record</span><span class="p">()</span>
+                <span class="c"># create random password</span>
+                <span class="n">record</span><span class="p">[</span><span class="s">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gen_password</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c"># need to handle this error</span>
+                <span class="c"># move to next record.</span>
+                <span class="k">continue</span>
+
+            <span class="k">print</span> <span class="n">record</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">username</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">)</span>
+                <span class="n">email</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">)</span>
+                <span class="n">password</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create_user</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">record</span><span class="p">)</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+
+
+<div class="viewcode-block" id="my_contact_page"><a class="viewcode-back" href="../views.html#views.my_contact_page">[docs]</a><span class="k">class</span> <span class="nc">my_contact_page</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class based generic view.</span>
+<span class="sd">    user can update his profile</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Person</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;edit_user_profile.html&#39;</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="s">&quot;/org/list&quot;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">PersonForm</span>
+
+<div class="viewcode-block" id="my_contact_page.get_object"><a class="viewcode-back" href="../views.html#views.my_contact_page.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       overridden get_object method to get instance of person</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+       <span class="c"># return Person.objects.get(user=self.request.user)</span>
+       <span class="n">p</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+       <span class="k">return</span> <span class="n">p</span>
+</div>
+<div class="viewcode-block" id="my_contact_page.get"><a class="viewcode-back" href="../views.html#views.my_contact_page.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        HTTP get method to get profile instance of logged in user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">ppform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">cuform</span> <span class="o">=</span> <span class="n">ChangeUserForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">ppform</span><span class="o">=</span><span class="n">ppform</span><span class="p">,</span><span class="n">address_form</span><span class="o">=</span><span class="n">addrform</span><span class="p">,</span><span class="n">cuform</span><span class="o">=</span><span class="n">cuform</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="my_contact_page.post"><a class="viewcode-back" href="../views.html#views.my_contact_page.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        HTTP method which accept the data filled  and call validation method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">formclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form_class</span><span class="p">()</span>
+        <span class="n">ppform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">formclass</span><span class="p">)</span>
+        <span class="n">addrform</span> <span class="o">=</span> <span class="n">AddressForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">cuform</span> <span class="o">=</span> <span class="n">ChangeUserForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ppform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">addrform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">cuform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">ppform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">,</span><span class="n">cuform</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_invalid</span><span class="p">(</span><span class="n">ppform</span><span class="p">,</span> <span class="n">addrform</span><span class="p">,</span><span class="n">cuform</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="my_contact_page.form_valid"><a class="viewcode-back" href="../views.html#views.my_contact_page.form_valid">[docs]</a>    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppform</span><span class="p">,</span> <span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is valid. and update existing instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">address_form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">cuformo</span> <span class="o">=</span> <span class="n">cuform</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">ppform</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">cuformo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_success_url</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="my_contact_page.form_invalid"><a class="viewcode-back" href="../views.html#views.my_contact_page.form_invalid">[docs]</a>    <span class="k">def</span> <span class="nf">form_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppform</span><span class="p">,</span> <span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if a form is invalid. Re-renders the context data with the</span>
+<span class="sd">        data-filled forms and errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="n">ppform</span><span class="o">=</span><span class="n">ppform</span><span class="p">,</span>
+            <span class="n">address_form</span><span class="o">=</span><span class="n">address_form</span><span class="p">,</span><span class="n">cuform</span><span class="o">=</span><span class="n">cuform</span><span class="p">))</span></div>
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">my_contact_page</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+
+
+
+
+</div>
+<span class="k">def</span> <span class="nf">autocompleteModel</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">search_qs</span> <span class="o">=</span> <span class="n">Designation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title__startswith</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;search&#39;</span><span class="p">])</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search_qs</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;);&#39;</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">myfunction</span><span class="p">():</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;this is a debug message!&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">myotherfunction</span><span class="p">():</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;this is an error message!!&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">crm 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, ravip.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

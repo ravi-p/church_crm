@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load base %}
+
+{%block content %}
+<div class="row-fluid" id="id_content">
+	<div class="col-md-6" id="id_form">
+		<form role="form" name="org_form" method="post" class="form-horizontal">
+			{% csrf_token %}
+			<fieldset>
+				{{ form.non_field_errors }}
+				{%for field in form %}
+				<div class="form-group {%if field.errors %}has-error{%endif%}">
+					<label class="col-sm-3 control-label">{{field.label|title}}{% if field.field.required %}*{% endif %}</label>
+					<div class="col-sm-9">
+						{{field|addcss:"form-control"}}
+					</div>
+					{%if field.errors %}
+					<p class="help-block form-control-static">{%for error in field.errors|slice:"1"%} {{error}}{%endfor%}<p>{%endif%}
+				</div>
+				{%endfor%}
+				{%if object %}
+				<input class="btn btn-primary pull-right" type="submit" value="Update">
+				{%else%}
+				<input class="btn btn-primary pull-right" type="submit" value="Add">
+				{%endif%}
+				<div class="clearfix">&nbsp;</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+{%endblock%}

@@ -1,0 +1,48 @@
+
+#: templates/organization/organizationtype_list.html:25
+msgid "Organization Types"
+msgstr "Unternehmen Arten"
+
+#: templates/organization/designation_list.html:26
+msgid "Designations"
+msgstr "Bezeichnungen"
+
+#: templates/organization/designation_list.html:41
+msgid "List of all available designations in the system"
+msgstr "Liste aller verfügbaren Bezeichnungen"
+
+#: templates/organization/organization_list.html:27
+msgid "Organizations"
+msgstr "Unternehmen"
+
+#: templates/organization/organization_list.html:44
+msgid "List of all Organizations in the system"
+msgstr "Liste aller Unternehmen in das System"
+
+#: templates/organization/organizationtype_list.html:42
+msgid "Types tell you more about the organization"
+msgstr "Arten erfahren Sie mehr über die Organisation"
+
+#: templates/organization/person_list.html:26
+msgid "Users"
+msgstr "Benutzer"
+
+#: templates/organization/person_list.html:48
+msgid "List of users in the system"
+msgstr "Liste der Benutzer im System"
+
+#: templates/organization/visitingcards_list.html:45
+msgid "Visiting Cards"
+msgstr "Visitenkarten"
+
+#: templates/organization/visitingcards_list.html:65
+msgid "List of all visiting cards"
+msgstr "Liste aller Visitenkarten"
+
+#: ../templates/header.html:27
+msgid "Types"
+msgstr "Arten"
+
+#: ../templates/header.html:24
+msgid "Organizations"
+msgstr "orgenizasion"

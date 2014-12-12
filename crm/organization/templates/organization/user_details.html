@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{%block content %}
+<div id="id_content">
+    <p>
+    <a href="{{request.session.last_visited}}" class="btn btn-default">Back</a>
+   </p>      
+	<div class="panel panel-default">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<i class="glyphicon glyphicon-user">    {{puser.full_name}}</i>
+		</div>
+		<div class="panel-body details_info">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4">
+						<p><label>First Name:</label>{{puser.first_name}}</p>
+					</div>
+					<div class="col-md-4">
+						<p><label>Last Name:</label>{{puser.last_name}}</p>
+					</div>
+					<div class="col-md-4">
+						<p><label>Email:</label>{{puser.email}}</p>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p><label>Organizations:</label>
+						{% for org in orgs %}
+						<span>{{org}}{%if forloop.last %}{% else %}, {% endif %} </span>
+						{% endfor %}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<i class="glyphicon glyphicon-th-list">    Visiting Cards</i>
+		</div>
+		<div class="panel-body">
+			<p>Business Cards the user has<p>
+		</div>
+		<!-- Table -->
+		<table class="table table-striped">
+			<thead>
+				<td> Organization</td>
+				<td> Designation</td>
+				<td> Email Address </td>
+			</thead>
+			{%for obj in maps %}
+			<tr>
+				<td> {{obj.organization.name}} </td>
+				<td> {{obj.designation}} </td>
+				<td> {{obj.email}} </td>
+			</tr>
+			{% empty %}
+			<tr>
+				<td colspan=4>
+					Empty.
+				</td>
+			</tr>
+			{%endfor%}
+		</table>
+	</div>
+</div>
+
+{%endblock%}
